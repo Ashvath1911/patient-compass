@@ -10,11 +10,12 @@ const Index = () => {
     
     try {
       const response = await fetch('https://presolar-tania-unsallow.ngrok-free.dev/api/patients/intake', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+      },
+      body: JSON.stringify(data),
       });
 
       console.log('Response status:', response.status);
