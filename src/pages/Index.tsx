@@ -6,21 +6,32 @@ import { Link } from 'react-router-dom';
 const Index = () => {
   const handleSubmit = async (data: PatientIntakeData) => {
     console.log('Patient data submitted:', data);
+    console.log('Sending POST request to API...');
     
-    const response = await fetch('https://presolar-tania-unsallow.ngrok-free.dev/api/patients/intake', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await fetch('https://presolar-tania-unsallow.ngrok-free.dev/api/patients/intake', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Failed to submit patient data');
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API error response:', errorData);
+        throw new Error(errorData.message || 'Failed to submit patient data');
+      }
+
+      const result = await response.json();
+      console.log('API success response:', result);
+      return result;
+    } catch (error) {
+      console.error('Fetch error:', error);
+      throw error;
     }
-
-    return response.json();
   };
 
   return (
