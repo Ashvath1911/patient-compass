@@ -5,33 +5,41 @@ import { Link } from 'react-router-dom';
 
 const Index = () => {
   const handleSubmit = async (data: PatientIntakeData) => {
-    console.log('Patient data submitted:', data);
-    console.log('Sending POST request to API...');
+    alert('handleSubmit called');
     
     try {
-      const response = await fetch('https://presolar-tania-unsallow.ngrok-free.dev/api/patients/intake', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-      },
-      body: JSON.stringify(data),
-      });
+      console.log('Patient data submitted:', data);
+      console.log('Sending POST request to API...');
+      
+      try {
+        const response = await fetch('https://presolar-tania-unsallow.ngrok-free.dev/api/patients/intake', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+          },
+          body: JSON.stringify(data),
+        });
 
-      console.log('Response status:', response.status);
+        console.log('Response status:', response.status);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('API error response:', errorData);
-        throw new Error(errorData.message || 'Failed to submit patient data');
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('API error response:', errorData);
+          throw new Error(errorData.message || 'Failed to submit patient data');
+        }
+
+        const result = await response.json();
+        console.log('API success response:', result);
+        alert('Success: ' + JSON.stringify(result));
+        return result;
+      } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
       }
-
-      const result = await response.json();
-      console.log('API success response:', result);
-      return result;
-    } catch (error) {
-      console.error('Fetch error:', error);
-      throw error;
+    } catch (outerError) {
+      alert('Error: ' + (outerError instanceof Error ? outerError.message : String(outerError)));
+      throw outerError;
     }
   };
 
