@@ -5,10 +5,22 @@ import { Link } from 'react-router-dom';
 
 const Index = () => {
   const handleSubmit = async (data: PatientIntakeData) => {
-    // In production, this would save to Supabase
     console.log('Patient data submitted:', data);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    
+    const response = await fetch('http://localhost:3001/api/patients/intake', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to submit patient data');
+    }
+
+    return response.json();
   };
 
   return (
