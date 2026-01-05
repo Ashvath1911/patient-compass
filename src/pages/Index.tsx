@@ -7,7 +7,7 @@ const Index = () => {
   const handleSubmit = async (data: PatientIntakeData) => {
     console.log('Patient data submitted:', data);
     
-    const response = await fetch('http://localhost:3001/api/patients/intake', {
+    const response = await fetch('https://presolar-tania-unsallow.ngrok-free.dev/api/patients/intake', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
