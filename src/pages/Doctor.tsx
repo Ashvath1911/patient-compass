@@ -1,17 +1,7 @@
-import { DoctorConsole } from '@/components/doctor/DoctorConsole';
-import { Helmet } from 'react-helmet-async';
+import { DoctorConsoleLive } from '@/components/doctor/DoctorConsoleLive';
 
 const Doctor = () => {
-  return (
-    <>
-      <Helmet>
-        <title>Doctor Console | SPARC</title>
-        <meta name="description" content="Review AI-generated treatment recommendations for oncology patients" />
-        <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
-      <DoctorConsole />
-    </>
-  );
+  return <DoctorConsoleLive />;
 };
 
 export default Doctor;
