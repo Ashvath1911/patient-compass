@@ -12,10 +12,11 @@ const Index = () => {
       console.log('Sending POST request to API...');
       
       try {
-        const response = await fetch('http://localhost:3001/api/patients/intake', {
+        const response = await fetch('https://presolar-tania-unsallow.ngrok-free.dev/api/patients/intake', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
           },
           body: JSON.stringify(data),
         });
