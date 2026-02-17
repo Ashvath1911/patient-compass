@@ -37,30 +37,70 @@ export interface DoctorStats {
   average_confidence: number;
 }
 
+function normalizePatient(raw: Record<string, unknown>): PatientRecord {
+  return {
+    id: raw.id as number,
+    age: raw.age as number,
+    sex: raw.sex as string,
+    cancer_type: raw.cancer_type as string,
+    disease_stage: raw.disease_stage as string,
+    performance_status: raw.performance_status as number,
+    biomarkers: raw.biomarkers as string | Record<string, string>,
+    prior_treatments: raw.prior_treatments as string | string[],
+    comorbidities: raw.comorbidities as string | string[],
+    preferences: raw.preferences as string | Record<string, number>,
+    prioritized_goals: raw.prioritized_goals as string | string[],
+    consent_given: raw.consent_given as boolean,
+    created_at: raw.created_at as string,
+    updated_at: raw.updated_at as string,
+    suggestion_id: raw.suggestion_id as number | undefined,
+    ai_model: raw.ai_model as string | undefined,
+    confidence_score: raw.confidence_score as number | undefined,
+    ai_recommendation: raw.ai_recommendation as string | Record<string, unknown> | undefined,
+    guideline_sources: raw.guideline_sources as string | string[] | undefined,
+    review_status: (raw.review_status ?? raw.doctor_review_status) as string | undefined,
+    reviewed_at: raw.reviewed_at as string | undefined,
+    suggestion_created_at: (raw.suggestion_created_at ?? raw.recommendation_date) as string | undefined,
+  };
+}
+
 export async function fetchPatients(): Promise<PatientRecord[]> {
   const res = await fetch(`${API_BASE}/api/doctor/patients`, { headers });
   if (!res.ok) throw new Error('Failed to fetch patients');
   const data = await res.json();
-  // Handle both array and wrapped responses
-  if (Array.isArray(data)) return data;
-  if (data && Array.isArray(data.data)) return data.data;
-  if (data && Array.isArray(data.patients)) return data.patients;
-  if (data && Array.isArray(data.items)) return data.items;
-  if (data && Array.isArray(data.results)) return data.results;
-  console.error('Unexpected patients response structure:', data);
-  return [];
+  let list: Record<string, unknown>[] = [];
+  if (Array.isArray(data)) list = data;
+  else if (data && Array.isArray(data.patients)) list = data.patients;
+  else if (data && Array.isArray(data.data)) list = data.data;
+  else if (data && Array.isArray(data.items)) list = data.items;
+  else if (data && Array.isArray(data.results)) list = data.results;
+  else {
+    console.error('Unexpected patients response structure:', data);
+    return [];
+  }
+  return list.map(normalizePatient);
 }
 
 export async function fetchPatientDetail(id: number): Promise<PatientRecord> {
   const res = await fetch(`${API_BASE}/api/doctor/patients/${id}`, { headers });
   if (!res.ok) throw new Error('Failed to fetch patient details');
-  return res.json();
+  const data = await res.json();
+  // Handle wrapped response like { success: true, patient: {...} }
+  const raw = data?.patient ?? data?.data ?? data;
+  return normalizePatient(raw);
 }
 
 export async function fetchStats(): Promise<DoctorStats> {
   const res = await fetch(`${API_BASE}/api/doctor/stats`, { headers });
   if (!res.ok) throw new Error('Failed to fetch stats');
-  return res.json();
+  const data = await res.json();
+  const s = data?.stats ?? data;
+  return {
+    total_patients: Number(s.total_patients ?? 0),
+    pending_reviews: Number(s.pending_reviews ?? 0),
+    approved_recommendations: Number(s.approved_recommendations ?? s.approved_count ?? 0),
+    average_confidence: Number(s.average_confidence ?? s.avg_confidence ?? 0),
+  };
 }
 
 export async function updateReviewStatus(suggestionId: number, status: string): Promise<void> {
