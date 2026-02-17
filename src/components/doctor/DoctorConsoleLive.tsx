@@ -148,7 +148,7 @@ export function DoctorConsoleLive() {
     }
   };
 
-  const filtered = patients.filter((p) => {
+  const filtered = (patients ?? []).filter((p) => {
     const matchSearch = search === '' || [p.cancer_type, p.sex, String(p.age), p.disease_stage, String(p.id)]
       .some((f) => f?.toLowerCase().includes(search.toLowerCase()));
     const matchStatus = statusFilter === 'all' || (p.review_status || '') === statusFilter;
