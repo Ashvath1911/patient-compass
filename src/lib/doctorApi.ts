@@ -41,7 +41,15 @@ export interface DoctorStats {
 export async function fetchPatients(): Promise<PatientRecord[]> {
   const res = await fetch(`${API_BASE}/api/doctor/patients`, { headers });
   if (!res.ok) throw new Error('Failed to fetch patients');
-  return res.json();
+  const data = await res.json();
+  // Handle both array and wrapped responses
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.data)) return data.data;
+  if (data && Array.isArray(data.patients)) return data.patients;
+  if (data && Array.isArray(data.items)) return data.items;
+  if (data && Array.isArray(data.results)) return data.results;
+  console.error('Unexpected patients response structure:', data);
+  return [];
 }
 
 export async function fetchPatientDetail(id: number): Promise<PatientRecord> {
