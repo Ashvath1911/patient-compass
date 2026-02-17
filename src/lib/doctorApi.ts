@@ -1,8 +1,7 @@
-const API_BASE = 'https://presolar-tania-unsallow.ngrok-free.dev';
+const API_BASE = 'https://sparc-backend.onrender.com';
 
 const headers: Record<string, string> = {
   'Content-Type': 'application/json',
-  'ngrok-skip-browser-warning': 'true',
 };
 
 export interface PatientRecord {
