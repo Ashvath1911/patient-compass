@@ -27,3 +27,22 @@ Planned next steps:
 ```bash
 npm install
 npm run dev
+Then open: http://localhost:3000
+
+Repository structure (high level)
+
+app/ – routes + pages
+
+components/ – reusable UI components
+
+lib/ – helpers (validation, formatting, API clients)
+
+public/ – static assets
+
+Notes
+
+This repo is part of a broader clinical AI workflow exploration (SPARC/Patient Compass). If you’d like context, I can share a 1-page architecture note.
+
+License
+
+MIT (or update if different)
