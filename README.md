@@ -24,12 +24,12 @@ Planned next steps:
 - (Optional) Supabase / Postgres integration (planned)
 
 ## Run locally
-```bash
 npm install
 npm run dev
+
 Then open: http://localhost:3000
 
-Repository structure (high level)
+## Repository structure (high level)
 
 app/ – routes + pages
 
@@ -39,10 +39,10 @@ lib/ – helpers (validation, formatting, API clients)
 
 public/ – static assets
 
-Notes
+## Notes
 
 This repo is part of a broader clinical AI workflow exploration (SPARC/Patient Compass). If you’d like context, I can share a 1-page architecture note.
 
-License
+## License
 
-MIT (or update if different)
+MIT
