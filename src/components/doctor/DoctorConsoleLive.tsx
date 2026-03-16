@@ -98,6 +98,7 @@ export function DoctorConsoleLive() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedPatient, setSelectedPatient] = useState<PatientRecord | null>(null);
+  const [selectedSuggestions, setSelectedSuggestions] = useState<any[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [reviewStatus, setReviewStatus] = useState('');
