@@ -123,11 +123,14 @@ export function DoctorConsoleLive() {
     setModalOpen(true);
     setDetailLoading(true);
     try {
-      const detail = await fetchPatientDetail(patient.id);
+      const { patient: detail, suggestions } = await fetchPatientDetail(patient.id);
       setSelectedPatient(detail);
-      setReviewStatus(detail.review_status || 'pending');
+      setSelectedSuggestions(suggestions);
+      const firstStatus = suggestions?.[0]?.review_status ?? suggestions?.[0]?.doctor_review_status ?? detail.review_status ?? 'pending';
+      setReviewStatus(firstStatus);
     } catch {
       setSelectedPatient(patient);
+      setSelectedSuggestions([]);
       setReviewStatus(patient.review_status || 'pending');
     } finally {
       setDetailLoading(false);
