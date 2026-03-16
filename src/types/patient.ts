@@ -56,11 +56,11 @@ export const defaultPatientIntakeData: PatientIntakeData = {
     comorbidities: [],
   },
   preferences: {
-    survivalBenefit: 3,
-    qualityOfLife: 3,
-    toxicityTolerance: 3,
-    costSensitivity: 3,
-    conveniencePreference: 3,
+    survivalBenefit: 0,
+    qualityOfLife: 0,
+    toxicityTolerance: 0,
+    costSensitivity: 0,
+    conveniencePreference: 0,
   },
   prioritization: {
     rankedGoals: [

@@ -10,6 +10,7 @@ import {
   type PatientRecord,
   type DoctorStats,
 } from '@/lib/doctorApi';
+import { AIRecommendationPanel } from '@/components/doctor/AIRecommendationPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -98,6 +99,7 @@ export function DoctorConsoleLive() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedPatient, setSelectedPatient] = useState<PatientRecord | null>(null);
+  const [selectedSuggestions, setSelectedSuggestions] = useState<any[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [reviewStatus, setReviewStatus] = useState('');
@@ -122,11 +124,14 @@ export function DoctorConsoleLive() {
     setModalOpen(true);
     setDetailLoading(true);
     try {
-      const detail = await fetchPatientDetail(patient.id);
+      const { patient: detail, suggestions } = await fetchPatientDetail(patient.id);
       setSelectedPatient(detail);
-      setReviewStatus(detail.review_status || 'pending');
+      setSelectedSuggestions(suggestions);
+      const firstStatus = suggestions?.[0]?.review_status ?? suggestions?.[0]?.doctor_review_status ?? detail.review_status ?? 'pending';
+      setReviewStatus(firstStatus);
     } catch {
       setSelectedPatient(patient);
+      setSelectedSuggestions([]);
       setReviewStatus(patient.review_status || 'pending');
     } finally {
       setDetailLoading(false);
@@ -381,63 +386,29 @@ export function DoctorConsoleLive() {
                 {/* Right: AI Recommendation */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-foreground border-b border-border pb-2">AI Recommendation</h3>
+                  <AIRecommendationPanel suggestions={selectedSuggestions} />
 
-                  {selectedPatient.suggestion_id ? (
-                    <>
-                      <dl className="space-y-2 text-sm">
-                        <div className="flex justify-between"><dt className="text-muted-foreground">AI Model</dt><dd className="font-medium">{selectedPatient.ai_model || '—'}</dd></div>
-                        <div className="flex justify-between items-center">
-                          <dt className="text-muted-foreground">Confidence</dt>
-                          <dd><ConfidenceStars score={selectedPatient.confidence_score} /></dd>
-                        </div>
-                        <div className="flex justify-between"><dt className="text-muted-foreground">Generated</dt><dd className="font-medium">{formatDate(selectedPatient.suggestion_created_at)}</dd></div>
-                      </dl>
-
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-1">Recommendation</h4>
-                        <div className="bg-secondary/50 rounded-lg p-3 text-sm space-y-1 max-h-48 overflow-y-auto">
-                          {renderJsonList(selectedPatient.ai_recommendation).map((line, i) => (
-                            <p key={i}>{line}</p>
-                          ))}
-                        </div>
+                  {/* Review status controls */}
+                  {selectedSuggestions.length > 0 && (
+                    <div className="border-t border-border pt-4 space-y-3">
+                      <h4 className="text-sm font-medium">Update Review Status</h4>
+                      <div className="flex items-center gap-2">
+                        <Select value={reviewStatus} onValueChange={setReviewStatus}>
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="approved">Approved</SelectItem>
+                            <SelectItem value="rejected">Rejected</SelectItem>
+                            <SelectItem value="needs_revision">Needs Revision</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button onClick={handleSaveStatus} disabled={saving} size="sm">
+                          {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <CheckCircle className="w-4 h-4 mr-1" />}
+                          Save
+                        </Button>
                       </div>
-
-                      {selectedPatient.guideline_sources && (
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-1">Guideline Sources</h4>
-                          <div className="flex flex-wrap gap-1">
-                            {renderJsonList(selectedPatient.guideline_sources).map((s, i) => (
-                              <Badge key={i} variant="secondary" className="text-xs">{s}</Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="border-t border-border pt-4 space-y-3">
-                        <h4 className="text-sm font-medium">Review Status</h4>
-                        <div className="flex items-center gap-2">
-                          <Select value={reviewStatus} onValueChange={setReviewStatus}>
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="approved">Approved</SelectItem>
-                              <SelectItem value="rejected">Rejected</SelectItem>
-                              <SelectItem value="needs_revision">Needs Revision</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button onClick={handleSaveStatus} disabled={saving} size="sm">
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <CheckCircle className="w-4 h-4 mr-1" />}
-                            Save
-                          </Button>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                      <Inbox className="w-8 h-8 mb-2" />
-                      <p className="text-sm">No AI recommendation generated yet</p>
                     </div>
                   )}
                 </div>
