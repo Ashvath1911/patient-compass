@@ -1,6 +1,7 @@
 import { PatientPreferences } from '@/types/patient';
-import { PreferenceSlider } from './PreferenceSlider';
 import { Heart, Shield, DollarSign, Clock, Sparkles } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 interface Step3Props {
   data: PatientPreferences;
@@ -13,44 +14,49 @@ const preferenceConfig = [
     label: 'Survival Benefit',
     description: 'How important is maximizing your length of survival?',
     icon: Heart,
-    lowLabel: 'Less Important',
-    highLabel: 'Top Priority',
   },
   {
     key: 'qualityOfLife' as const,
     label: 'Quality of Life',
     description: 'How important is maintaining your current quality of life during treatment?',
     icon: Sparkles,
-    lowLabel: 'Can Compromise',
-    highLabel: 'Essential',
   },
   {
     key: 'toxicityTolerance' as const,
     label: 'Toxicity Tolerance',
     description: 'How willing are you to accept treatment side effects?',
     icon: Shield,
-    lowLabel: 'Avoid Side Effects',
-    highLabel: 'Accept if Needed',
   },
   {
     key: 'costSensitivity' as const,
     label: 'Cost Sensitivity',
     description: 'How much does treatment cost factor into your decision?',
     icon: DollarSign,
-    lowLabel: 'Not a Factor',
-    highLabel: 'Major Factor',
   },
   {
     key: 'conveniencePreference' as const,
     label: 'Convenience Preference',
     description: 'How important is treatment convenience (e.g., oral vs. infusion, frequency of visits)?',
     icon: Clock,
-    lowLabel: 'Not Important',
-    highLabel: 'Very Important',
   },
 ];
 
+const rankLabels: Record<number, string> = {
+  1: '1 — Least Important',
+  2: '2 — Slightly Important',
+  3: '3 — Moderately Important',
+  4: '4 — Very Important',
+  5: '5 — Most Important',
+};
+
 export function Step3Preferences({ data, onChange }: Step3Props) {
+  // Collect used values (excluding 0/unset)
+  const usedValues = new Set(
+    preferenceConfig
+      .map((p) => data[p.key])
+      .filter((v) => v >= 1 && v <= 5)
+  );
+
   const updatePreference = (key: keyof PatientPreferences, value: number) => {
     onChange({ ...data, [key]: value });
   };
@@ -63,28 +69,58 @@ export function Step3Preferences({ data, onChange }: Step3Props) {
         </div>
         <h2 className="text-2xl font-bold text-foreground">Your Preferences</h2>
         <p className="text-muted-foreground mt-2">
-          Rate each factor from 1 (not important) to 5 (extremely important) to help us understand your priorities.
+          Rank each factor from 1 (least important) to 5 (most important). Each ranking can only be used once.
         </p>
       </div>
 
       <div className="space-y-4 stagger-children">
-        {preferenceConfig.map((pref) => (
-          <PreferenceSlider
-            key={pref.key}
-            label={pref.label}
-            description={pref.description}
-            value={data[pref.key]}
-            onChange={(value) => updatePreference(pref.key, value)}
-            lowLabel={pref.lowLabel}
-            highLabel={pref.highLabel}
-          />
-        ))}
+        {preferenceConfig.map((pref) => {
+          const Icon = pref.icon;
+          const currentValue = data[pref.key];
+
+          return (
+            <div key={pref.key} className="card-clinical p-6 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Icon className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground">{pref.label}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{pref.description}</p>
+                </div>
+                <div className="shrink-0 w-[220px]">
+                  <Select
+                    value={currentValue >= 1 && currentValue <= 5 ? String(currentValue) : ''}
+                    onValueChange={(v) => updatePreference(pref.key, Number(v))}
+                  >
+                    <SelectTrigger className={cn(
+                      'w-full',
+                      currentValue >= 1 && currentValue <= 5 ? 'border-primary/40' : ''
+                    )}>
+                      <SelectValue placeholder="Select ranking" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5].map((n) => {
+                        const isUsedElsewhere = usedValues.has(n) && currentValue !== n;
+                        return (
+                          <SelectItem key={n} value={String(n)} disabled={isUsedElsewhere}>
+                            {rankLabels[n]}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="bg-info/10 border border-info/20 rounded-lg p-4 mt-6">
         <p className="text-sm text-info">
-          <strong>Note:</strong> These preferences help personalize treatment recommendations. 
-          There are no right or wrong answers – only what matters most to you.
+          <strong>Note:</strong> Each ranking (1–5) can only be used once. 
+          This ensures your preferences are clearly prioritized.
         </p>
       </div>
     </div>
