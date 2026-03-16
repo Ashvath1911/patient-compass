@@ -81,13 +81,28 @@ export async function fetchPatients(): Promise<PatientRecord[]> {
   return list.map(normalizePatient);
 }
 
-export async function fetchPatientDetail(id: number): Promise<PatientRecord> {
+export interface PatientDetailResult {
+  patient: PatientRecord;
+  suggestions: Array<{
+    id?: number;
+    ai_recommendation?: string | Record<string, unknown>;
+    confidence_score?: number;
+    guideline_sources?: string | string[];
+    review_status?: string;
+    doctor_review_status?: string;
+    created_at?: string;
+  }>;
+}
+
+export async function fetchPatientDetail(id: number): Promise<PatientDetailResult> {
   const res = await fetch(`${API_BASE}/api/doctor/patients/${id}`, { headers });
   if (!res.ok) throw new Error('Failed to fetch patient details');
   const data = await res.json();
-  // Handle wrapped response like { success: true, patient: {...} }
   const raw = data?.patient ?? data?.data ?? data;
-  return normalizePatient(raw);
+  const patient = normalizePatient(raw);
+  // Extract suggestions array from response
+  const suggestions = data?.suggestions ?? data?.recommendations ?? [];
+  return { patient, suggestions };
 }
 
 export async function fetchStats(): Promise<DoctorStats> {
