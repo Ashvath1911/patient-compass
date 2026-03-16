@@ -10,6 +10,7 @@ import {
   type PatientRecord,
   type DoctorStats,
 } from '@/lib/doctorApi';
+import { AIRecommendationPanel } from '@/components/doctor/AIRecommendationPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
